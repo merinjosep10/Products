@@ -1,0 +1,166 @@
+<div class="central text-center" *ngIf="!products.length">
+  <div class="row list-parent">
+    <div class="col-12 py-3">
+      <h6>Inventory empty</h6>
+    </div>
+    <div class="col-12 py-3">
+      <p>Click to add new products and it's prices</p>
+    </div>
+  </div>
+</div>
+
+<div class="row py-5 list-parent" *ngIf="products.length">
+  <div class="col-12 col-sm-8 col-md-8 col-lg-8">
+    <div class="product_list dflex">
+      <div
+        class="card"
+        style="width: 10rem; background-color: #e9ecef"
+        *ngFor="let product of products; let i = index"
+      >
+        <div class="card-body">
+          <h5 class="card-title">Name : {{ product.name }}</h5>
+          <p class="card-text">Price : {{ product.price }}</p>
+          <button
+            class="card-button"
+            type="button"
+            (click)="editButtonClicked(product.id)"
+            data-bs-toggle="modal"
+            data-bs-target="#myModal"
+          >
+            Edit
+          </button>
+
+          <button
+            style="margin-left: 16px"
+            class="card-button"
+            (click)="delete_product(product.id)"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row text-center">
+  <div class="col-sm-2 col-md-3 col-lg-4"></div>
+  <div class="col-12 col-sm-8 col-md-6 col-lg-4">
+    <button
+      class="modal-button"
+      data-bs-toggle="modal"
+      data-bs-target="#addModal"
+      style="width: 150px; background-color: #e9ecef"
+    >
+      Add Product
+    </button>
+  </div>
+</div>
+
+<!-- edit modal box -->
+<div class="modal" id="addModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Add the product details</h4>
+        <button
+          type="button"
+          class="btn-close modal-button-close-icon px-4"
+          data-bs-dismiss="modal"
+        ></button>
+      </div>
+      <form [formGroup]="AddForm">
+        <!-- Modal body -->
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="name">Name</label>
+            <input
+              type="text"
+              class="form-control form-control-sm mb-3"
+              id="name"
+              formControlName="newproduct"
+            />
+          </div>
+          <div class="form-group">
+            <label for="price">Price</label>
+            <input
+              type="text"
+              id="price"
+              class="form-control form-control-sm"
+              formControlName="newproductprice"
+            />
+          </div>
+        </div>
+
+        <!-- Modal footer -->
+        <div class="modal-footer dflex justify-content-around">
+          <button
+            class="modal-button"
+            type="submit"
+            (click)="onSubmit()"
+            data-bs-dismiss="modal"
+          >
+            Save
+          </button>
+          <button class="modal-button" type="button" data-bs-dismiss="modal">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- edit modal box -->
+<div class="modal" id="myModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Edit the product details</h4>
+        <button
+          type="button"
+          class="btn-close modal-button-close-icon px-4"
+          data-bs-dismiss="modal"
+        ></button>
+      </div>
+
+      <!-- Modal body -->
+      <form [formGroup]="EditForm">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="name">Name</label>
+            <input
+              type="text"
+              id="name"
+              class="form-control form-control-sm mb-3"
+              formControlName="editproduct"
+            />
+          </div>
+          <div class="form-group">
+            <label for="price">Price</label>
+            <input
+              type="text"
+              class="form-control form-control-sm"
+              formControlName="editproductprice"
+            />
+          </div>
+        </div>
+
+        <!-- Modal footer -->
+        <div class="modal-footer dflex justify-content-around">
+          <button
+            class="modal-button"
+            type="submit"
+            (click)="edit_product()"
+            data-bs-dismiss="modal"
+          >
+            Update
+          </button>
+          <button class="modal-button" type="button" data-bs-dismiss="modal">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
