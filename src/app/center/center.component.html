@@ -15,7 +15,7 @@
       <div
         class="card"
         style="width: 10rem; background-color: #e9ecef"
-        *ngFor="let product of products; let i = index"
+        *ngFor="let product of products; trackBy: trackById"
       >
         <div class="card-body">
           <h5 class="card-title">Name : {{ product.name }}</h5>
@@ -23,7 +23,7 @@
           <button
             class="card-button"
             type="button"
-            (click)="editButtonClicked(product.id)"
+            (click)="editButtonClicked(product)"
             data-bs-toggle="modal"
             data-bs-target="#myModal"
           >

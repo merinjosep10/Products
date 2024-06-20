@@ -1,85 +1,105 @@
-import { Component , OnInit} from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import {IProduct } from './todo';
+import { IProduct } from './todo';
 import { ReactiveFormsModule } from '@angular/forms';
 import { NgFor } from '@angular/common';
 import { NgIf } from '@angular/common';
 import { CommonModule } from '@angular/common';
 import { FormGroup } from '@angular/forms';
 import { FormControl } from '@angular/forms';
-
+import { HttpClientModule } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-center',
   standalone: true,
-  imports:[FormsModule,ReactiveFormsModule,NgFor,NgIf,CommonModule],
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    NgFor,
+    NgIf,
+    CommonModule,
+    HttpClientModule,
+  ],
   templateUrl: './center.component.html',
-  styleUrls: ['./center.component.css']
+  styleUrls: ['./center.component.css'],
 })
-
-export class CenterComponent implements OnInit{
-  products :IProduct[]=[];
-  productToEdit: number;
-  AddForm!:FormGroup;
-  EditForm! : FormGroup;
-  constructor()
-  {
-    this.productToEdit=0;
+export class CenterComponent implements OnInit {
+  products: IProduct[] = [];
+  trackById(index: number, product: IProduct) {
+    return product.id;
   }
+  productToEdit!: number;
+  AddForm!: FormGroup;
+  EditForm!: FormGroup;
+  constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
-    this.AddForm=new FormGroup({
-      'newproduct':new FormControl(null),
-      'newproductprice':new FormControl(null)
+    this.AddForm = new FormGroup({
+      newproduct: new FormControl(null),
+      newproductprice: new FormControl(null),
     });
-    this.EditForm=new FormGroup({
-      'editproduct':new FormControl(null),
-      'editproductprice':new FormControl(null)
+    this.EditForm = new FormGroup({
+      editproduct: new FormControl(null),
+      editproductprice: new FormControl(null),
     });
     this.loadProducts();
   }
-  loadProducts(){
-    const productsJson = localStorage.getItem('products');
-    if (productsJson) {
-      this.products = JSON.parse(productsJson);
-    }
+  loadProducts() {
+    this.http
+      .get<IProduct[]>('https://addproduct.free.beeceptor.com/api/products')
+      .subscribe((data: IProduct[]) => {
+        this.products = data;
+      });
   }
-  onSubmit()
-  {
+  onSubmit() {
     const product = {
       name: this.AddForm.get('newproduct')?.value,
       price: this.AddForm.get('newproductprice')?.value,
-      id: new Date().getTime()
-  }
-  this.products.push(product)
-  this.AddForm.reset();
-  console.table(this.products)
-  localStorage.setItem('products',JSON.stringify(this.products));
-  }
-  delete_product(i:number)
-  {
-    this.products = this.products.filter(obj => obj.id !== i);
+    };
+
     console.table(this.products);
-    localStorage.setItem('products',JSON.stringify(this.products));
+    this.http
+      .post<IProduct>(
+        'https://addproduct.free.beeceptor.com/api/products',
+        product
+      )
+      .subscribe(() => {
+        this.AddForm.reset();
+        this.loadProducts();
+      });
   }
-  edit_product()
-  {
+  delete_product(i: number) {
+    this.http
+      .delete(`https://addproduct.free.beeceptor.com/api/products/${i}`)
+      .subscribe(() => {
+        console.table(this.products);
+        this.loadProducts();
+      });
+  }
+  edit_product() {
     const i = this.productToEdit;
-    for (let object of this.products) {
-      if (object.id === i) {
-          object.name = this.EditForm.get('editproduct')?.value,
-          object.price = this.EditForm.get('editproductprice')?.value,
-          console.log(object.id)
-      }
-  }
-  localStorage.setItem('products',JSON.stringify(this.products));
+    const product: IProduct | undefined = this.products.find(
+      (obj) => obj.id === i
+    );
+    if (product) {
+      product.name = this.EditForm.get('editproduct')?.value;
+      product.price = this.EditForm.get('editproductprice')?.value;
+    }
+    this.http
+      .put(`https://addproduct.free.beeceptor.com/api/products/${i}`, product)
+      .subscribe(() => {
+        console.log(product);
+        this.EditForm.reset();
+        this.loadProducts();
+      });
   }
 
-  editButtonClicked(i: number) {
-    this.productToEdit = i;
+  editButtonClicked(product: IProduct) {
+    this.productToEdit = product.id;
     this.EditForm.setValue({
-      editproduct: this.products.find(obj => obj.id === i)?.name || '',
-      editproductprice: this.products.find(obj => obj.id === i)?.price||0
+      editproduct: product.name,
+      editproductprice: product.price,
     });
   }
 }
